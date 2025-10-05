@@ -25,7 +25,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# CORSミドルウェアの設定（全オリジンを許可）
+# CORSミドルウェアの設定(全オリジンを許可)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # 本番環境では特定のオリジンに制限すること
@@ -44,8 +44,7 @@ async def health_check():
         dict: ステータス情報
     """
     return JSONResponse(
-        status_code=200,
-        content={"status": "healthy", "service": "jockey-data-api"}
+        status_code=200, content={"status": "healthy", "service": "jockey-data-api"}
     )
 
 
