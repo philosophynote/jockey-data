@@ -5,11 +5,12 @@ FastAPI Application Entry Point
 """
 
 import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.core.logging import setup_logging, get_logger
+from app.core.logging import get_logger, setup_logging
 
 # ロギングの初期化
 log_level = os.getenv("LOG_LEVEL", "INFO")

@@ -5,7 +5,6 @@ Lambda Web Adapterのコールドスタート最適化のため、
 S3Accessorをグローバルスコープで初期化します。
 """
 
-import os
 from typing import Optional
 
 from app.core.logging import get_logger

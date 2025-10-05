@@ -5,9 +5,10 @@ S3Accessor - AWS S3とSSM Parameter Storeへのアクセスを提供
 """
 
 import os
-import boto3
 from io import BytesIO
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
+
+import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 
 from app.core.logging import get_logger
@@ -54,7 +55,7 @@ class S3Accessor:
             )
 
             logger.info(
-                f"S3Accessor initialized successfully",
+                "S3Accessor initialized successfully",
                 extra={"bucket": self.bucket_name, "region": self.region_name}
             )
 
@@ -81,7 +82,7 @@ class S3Accessor:
             return response["Parameter"]["Value"]
         except ClientError as e:
             logger.error(
-                f"Failed to get SSM parameter",
+                "Failed to get SSM parameter",
                 extra={"parameter": name, "error": str(e)}
             )
             raise SSMConfigError(name, e)
@@ -103,10 +104,10 @@ class S3Accessor:
             S3AccessError: S3接続エラーが発生した場合
         """
         try:
-            logger.info(f"Fetching object from S3", extra={"bucket": self.bucket_name, "key": key})
+            logger.info("Fetching object from S3", extra={"bucket": self.bucket_name, "key": key})
             response = self.client.get_object(Bucket=self.bucket_name, Key=key)
             data = response["Body"].read()
-            logger.info(f"Successfully fetched object", extra={"bucket": self.bucket_name, "key": key, "size": len(data)})
+            logger.info("Successfully fetched object", extra={"bucket": self.bucket_name, "key": key, "size": len(data)})
             return data
 
         except ClientError as e:
@@ -115,14 +116,14 @@ class S3Accessor:
             if error_code == "NoSuchKey":
                 # ファイルが存在しない場合はNoneを返す（404相当）
                 logger.warning(
-                    f"Object not found in S3",
+                    "Object not found in S3",
                     extra={"bucket": self.bucket_name, "key": key}
                 )
                 return None
             else:
                 # その他のS3エラーは例外として送出
                 logger.error(
-                    f"S3 access error",
+                    "S3 access error",
                     extra={
                         "bucket": self.bucket_name,
                         "key": key,
@@ -142,7 +143,7 @@ class S3Accessor:
 
         except Exception as e:
             logger.error(
-                f"Unexpected error getting object from S3",
+                "Unexpected error getting object from S3",
                 extra={"bucket": self.bucket_name, "key": key, "error": str(e)}
             )
             raise S3AccessError(
@@ -186,14 +187,14 @@ class S3Accessor:
                 continuation_token = response.get("NextContinuationToken")
 
             logger.info(
-                f"Listed objects in S3",
+                "Listed objects in S3",
                 extra={"bucket": self.bucket_name, "prefix": prefix, "count": len(objects)}
             )
             return objects
 
         except Exception as e:
             logger.error(
-                f"Error listing objects",
+                "Error listing objects",
                 extra={"bucket": self.bucket_name, "prefix": prefix, "error": str(e)}
             )
             return []
@@ -238,7 +239,7 @@ class S3Accessor:
         """
         try:
             self.client.upload_file(local_path, self.bucket_name, key)
-            logger.info(f"Uploaded file to S3", extra={"bucket": self.bucket_name, "key": key})
+            logger.info("Uploaded file to S3", extra={"bucket": self.bucket_name, "key": key})
         except Exception as e:
             logger.error(f"Error uploading file: {e}")
 
@@ -252,7 +253,7 @@ class S3Accessor:
         """
         try:
             self.client.upload_fileobj(file_obj, self.bucket_name, key)
-            logger.info(f"Uploaded file object to S3", extra={"bucket": self.bucket_name, "key": key})
+            logger.info("Uploaded file object to S3", extra={"bucket": self.bucket_name, "key": key})
         except Exception as e:
             logger.error(f"Error uploading file object: {e}")
 
@@ -266,7 +267,7 @@ class S3Accessor:
         """
         try:
             self.client.put_object(Body=body, Bucket=self.bucket_name, Key=key)
-            logger.info(f"Put object to S3", extra={"bucket": self.bucket_name, "key": key})
+            logger.info("Put object to S3", extra={"bucket": self.bucket_name, "key": key})
         except Exception as e:
             logger.error(f"Error putting object: {e}")
 
@@ -283,6 +284,6 @@ class S3Accessor:
             df.to_pickle(buffer)
             buffer.seek(0)
             self.upload_fileobj(buffer, key)
-            logger.info(f"Uploaded DataFrame to S3", extra={"bucket": self.bucket_name, "key": key})
+            logger.info("Uploaded DataFrame to S3", extra={"bucket": self.bucket_name, "key": key})
         except Exception as e:
             logger.error(f"Error uploading DataFrame: {e}")

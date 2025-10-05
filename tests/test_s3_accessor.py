@@ -4,12 +4,13 @@ S3Accessor Unit Tests
 S3Accessorの基本機能をモックを使用してテストします。
 """
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from botocore.exceptions import ClientError
 
 from app.infrastructure.s3_accessor import S3Accessor
-from app.models.exceptions import S3AccessError, SSMConfigError
+from app.models.exceptions import S3AccessError
 
 
 class TestS3Accessor:
