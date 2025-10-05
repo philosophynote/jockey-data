@@ -4,9 +4,19 @@ FastAPI Application Entry Point
 騎手データをS3から取得してJSON形式で返却するREST APIサーバー
 """
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
+from app.core.logging import setup_logging, get_logger
+
+# ロギングの初期化
+log_level = os.getenv("LOG_LEVEL", "INFO")
+setup_logging(log_level)
+logger = get_logger(__name__)
+
+logger.info("Starting Jockey Data API application")
 
 # FastAPIアプリケーションの初期化
 app = FastAPI(
