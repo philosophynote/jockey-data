@@ -1,6 +1,6 @@
 # Jockey Data API
 
-![CI](https://github.com/YOUR_USERNAME/jockey-data/workflows/CI/badge.svg)
+![CI](https://github.com/philosophynote/jockey-data/workflows/CI/badge.svg)
 
 騎手IDに基づいてAWS S3からpickleファイルを取得し、JSON形式で返却するREST APIサーバー。
 

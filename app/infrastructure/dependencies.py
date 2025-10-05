@@ -5,6 +5,7 @@ Lambda Web Adapterのコールドスタート最適化のため、
 S3Accessorをグローバルスコープで初期化します。
 """
 
+import threading
 from typing import Optional
 
 from app.core.logging import get_logger
@@ -15,6 +16,7 @@ logger = get_logger(__name__)
 
 # グローバルなS3Accessorインスタンス
 _s3_accessor: Optional[S3Accessor] = None
+_lock = threading.Lock()
 
 
 def get_s3_accessor() -> S3Accessor:
@@ -32,19 +34,20 @@ def get_s3_accessor() -> S3Accessor:
     """
     global _s3_accessor
 
-    if _s3_accessor is None:
-        logger.info("Initializing S3Accessor (first time)")
-        try:
-            _s3_accessor = S3Accessor()
-            logger.info("S3Accessor initialized successfully")
-        except SSMConfigError as e:
-            logger.error(f"Failed to initialize S3Accessor: {e}")
-            raise
-        except Exception as e:
-            logger.error(f"Unexpected error initializing S3Accessor: {e}")
-            raise SSMConfigError("S3Accessor", e)
-    else:
-        logger.debug("Reusing existing S3Accessor instance")
+    with _lock:
+        if _s3_accessor is None:
+            logger.info("Initializing S3Accessor (first time)")
+            try:
+                _s3_accessor = S3Accessor()
+                logger.info("S3Accessor initialized successfully")
+            except SSMConfigError as e:
+                logger.error(f"Failed to initialize S3Accessor: {e}")
+                raise
+            except Exception as e:
+                logger.error(f"Unexpected error initializing S3Accessor: {e}")
+                raise SSMConfigError("S3Accessor", e) from e
+        else:
+            logger.debug("Reusing existing S3Accessor instance")
 
     return _s3_accessor
 
@@ -54,5 +57,6 @@ def reset_s3_accessor() -> None:
     S3Accessorインスタンスをリセット（主にテスト用）
     """
     global _s3_accessor
-    _s3_accessor = None
-    logger.info("S3Accessor instance reset")
+    with _lock:
+        _s3_accessor = None
+        logger.info("S3Accessor instance reset")

@@ -61,7 +61,7 @@ class S3Accessor:
 
         except Exception as e:
             logger.error(f"Failed to initialize S3Accessor: {e}")
-            raise SSMConfigError("S3Accessor initialization", e)
+            raise SSMConfigError("S3Accessor initialization", e) from e
 
     def get_parameter(self, name: str) -> str:
         """
@@ -79,16 +79,17 @@ class S3Accessor:
         try:
             response = self.ssm_client.get_parameter(Name=name, WithDecryption=True)
             logger.debug(f"Retrieved SSM parameter: {name}")
-            return response["Parameter"]["Value"]
+            value: str = response["Parameter"]["Value"]
+            return value
         except ClientError as e:
             logger.error(
                 "Failed to get SSM parameter",
                 extra={"parameter": name, "error": str(e)}
             )
-            raise SSMConfigError(name, e)
+            raise SSMConfigError(name, e) from e
         except Exception as e:
             logger.error(f"Unexpected error getting SSM parameter: {e}")
-            raise SSMConfigError(name, e)
+            raise SSMConfigError(name, e) from e
 
     def get_object(self, key: str) -> Optional[bytes]:
         """
@@ -106,7 +107,7 @@ class S3Accessor:
         try:
             logger.info("Fetching object from S3", extra={"bucket": self.bucket_name, "key": key})
             response = self.client.get_object(Bucket=self.bucket_name, Key=key)
-            data = response["Body"].read()
+            data: bytes = response["Body"].read()
             logger.info("Successfully fetched object", extra={"bucket": self.bucket_name, "key": key, "size": len(data)})
             return data
 
@@ -135,11 +136,11 @@ class S3Accessor:
                     f"Failed to get object from S3: {error_code}",
                     bucket=self.bucket_name,
                     key=key
-                )
+                ) from e
 
         except NoCredentialsError as e:
             logger.error(f"AWS credentials not found: {e}")
-            raise S3AccessError("AWS credentials not found", bucket=self.bucket_name, key=key)
+            raise S3AccessError("AWS credentials not found", bucket=self.bucket_name, key=key) from e
 
         except Exception as e:
             logger.error(
@@ -150,7 +151,7 @@ class S3Accessor:
                 f"Unexpected error: {str(e)}",
                 bucket=self.bucket_name,
                 key=key
-            )
+            ) from e
 
     def list_objects(self, prefix: str, delimiter: str = "/") -> List[Dict[str, Any]]:
         """
@@ -236,12 +237,23 @@ class S3Accessor:
         Args:
             local_path: ローカルファイルパス
             key: S3オブジェクトキー
+
+        Raises:
+            S3AccessError: アップロードに失敗した場合
         """
         try:
             self.client.upload_file(local_path, self.bucket_name, key)
             logger.info("Uploaded file to S3", extra={"bucket": self.bucket_name, "key": key})
         except Exception as e:
-            logger.error(f"Error uploading file: {e}")
+            logger.error(
+                "Error uploading file",
+                extra={"bucket": self.bucket_name, "key": key, "error": str(e)}
+            )
+            raise S3AccessError(
+                f"Failed to upload file to S3: {str(e)}",
+                bucket=self.bucket_name,
+                key=key,
+            ) from e
 
     def upload_fileobj(self, file_obj: BytesIO, key: str) -> None:
         """
@@ -250,12 +262,23 @@ class S3Accessor:
         Args:
             file_obj: アップロードするファイルオブジェクト
             key: S3バケット内のオブジェクトキー
+
+        Raises:
+            S3AccessError: アップロードに失敗した場合
         """
         try:
             self.client.upload_fileobj(file_obj, self.bucket_name, key)
             logger.info("Uploaded file object to S3", extra={"bucket": self.bucket_name, "key": key})
         except Exception as e:
-            logger.error(f"Error uploading file object: {e}")
+            logger.error(
+                "Error uploading file object",
+                extra={"bucket": self.bucket_name, "key": key, "error": str(e)}
+            )
+            raise S3AccessError(
+                f"Failed to upload file object to S3: {str(e)}",
+                bucket=self.bucket_name,
+                key=key,
+            ) from e
 
     def put_object(self, body: bytes, key: str) -> None:
         """
@@ -264,12 +287,23 @@ class S3Accessor:
         Args:
             body: S3にアップロードするデータ
             key: S3バケット内のオブジェクトキー
+
+        Raises:
+            S3AccessError: アップロードに失敗した場合
         """
         try:
             self.client.put_object(Body=body, Bucket=self.bucket_name, Key=key)
             logger.info("Put object to S3", extra={"bucket": self.bucket_name, "key": key})
         except Exception as e:
-            logger.error(f"Error putting object: {e}")
+            logger.error(
+                "Error putting object",
+                extra={"bucket": self.bucket_name, "key": key, "error": str(e)}
+            )
+            raise S3AccessError(
+                f"Failed to put object to S3: {str(e)}",
+                bucket=self.bucket_name,
+                key=key,
+            ) from e
 
     def upload_dataframe(self, df, key: str) -> None:
         """

@@ -12,18 +12,14 @@ jobs:
     name: Code Quality & Tests
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        python-version: ['3.13']
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.13'
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -37,13 +33,11 @@ jobs:
 
       - name: Run linting (ruff)
         run: |
-          uv run ruff check app tests || true
-        continue-on-error: true
+          uv run ruff check app tests
 
       - name: Run type checking (mypy)
         run: |
-          uv run mypy app || true
-        continue-on-error: true
+          uv run mypy app
 
       - name: Run tests with coverage
         run: |
@@ -61,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-${{ matrix.python-version }}
+          name: test-results
           path: |
             coverage.xml
             .coverage
