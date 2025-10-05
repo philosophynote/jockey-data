@@ -22,7 +22,7 @@ class TestJockeyAPI:
     @pytest.fixture
     def real_pickle_data(self):
         """実際のpickleファイルを読み込むフィクスチャ"""
-        pickle_path = os.path.join(os.path.dirname(__file__), "..", "data", "05339.pickle")
+        pickle_path = os.path.join(os.path.dirname(__file__), "test_data.pickle")
         with open(pickle_path, "rb") as f:
             return f.read()
 
