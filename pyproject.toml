@@ -1,9 +1,12 @@
 [project]
 name = "jockey-data"
 version = "0.1.0"
-description = "Add your description here"
+description = "Jockey data API server - converts pickle files to JSON"
 readme = "README.md"
 requires-python = ">=3.13.2"
 dependencies = [
     "pandas>=2.3.3",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.32.0",
+    "boto3>=1.35.0",
 ]
