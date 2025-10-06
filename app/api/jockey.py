@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api", tags=["jockey"])
 
 
 @router.get("/jockey/{jockey_id}", response_model=List[dict[str, Any]])
-async def get_jockey_data(
+def get_jockey_data(
     jockey_id: str = Path(..., description="騎手ID（例: 05339）")
 ) -> List[dict[str, Any]]:
     """
