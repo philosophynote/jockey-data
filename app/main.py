@@ -10,7 +10,21 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.exception_handlers import (
+    general_exception_handler,
+    jockey_not_found_handler,
+    pickle_deserialize_error_handler,
+    s3_access_error_handler,
+    ssm_config_error_handler,
+)
+from app.api.jockey import router as jockey_router
 from app.core.logging import get_logger, setup_logging
+from app.models.exceptions import (
+    JockeyNotFoundError,
+    PickleDeserializeError,
+    S3AccessError,
+    SSMConfigError,
+)
 
 # ロギングの初期化
 log_level = os.getenv("LOG_LEVEL", "INFO")
@@ -34,6 +48,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# APIルーターの登録
+app.include_router(jockey_router)
+
+# 例外ハンドラーの登録
+app.add_exception_handler(JockeyNotFoundError, jockey_not_found_handler)  # type: ignore[arg-type]
+app.add_exception_handler(S3AccessError, s3_access_error_handler)  # type: ignore[arg-type]
+app.add_exception_handler(PickleDeserializeError, pickle_deserialize_error_handler)  # type: ignore[arg-type]
+app.add_exception_handler(SSMConfigError, ssm_config_error_handler)  # type: ignore[arg-type]
+app.add_exception_handler(Exception, general_exception_handler)
 
 
 @app.get("/health", tags=["health"])
