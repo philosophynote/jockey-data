@@ -35,11 +35,11 @@ class TestJockeyAPI:
     def test_health_check_response_time(self):
         """ヘルスチェックのレスポンス時間が5秒以内であることを検証"""
         import time
-        
+
         start_time = time.time()
         response = client.get("/health")
         elapsed_time = time.time() - start_time
-        
+
         assert response.status_code == 200
         assert elapsed_time < 5.0, f"Response time {elapsed_time}s exceeds 5 seconds"
 
