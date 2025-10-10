@@ -169,6 +169,7 @@ class TestIntegration:
             mock_s3_accessor = MagicMock()
             # 簡単なモックデータ
             import pickle
+
             import pandas as pd
             df = pd.DataFrame({"test": [1, 2, 3]})
             mock_s3_accessor.get_object.return_value = pickle.dumps(df)
